@@ -9,8 +9,8 @@ const devProxy = {
 const prodUrl = ''
 const prodProxy = {
   protocol: 'http',
-  host: 'fame-nginx',
-  port: 80
+  host: 'localhost',
+  port: 9090
 }
 
 const config = {

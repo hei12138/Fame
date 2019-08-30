@@ -31,7 +31,7 @@ logging:
     max-size: 10MB
     max-history: 15
   level:
-    root: debug
+    root: info
 
 
 
