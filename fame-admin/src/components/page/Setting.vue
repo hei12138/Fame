@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-tabs type="border-card">
+    <el-tabs>
       <el-tab-pane label="网站设置">
         <el-form ref="websiteForm" :model="options" :rules="websiteRules">
           <el-form-item label="博客名:">
@@ -18,6 +18,12 @@
               :rows="6"
               v-model="options.blog_footer"
               placeholder="请输入博客底部信息,可以使用html语句"
+            />
+          </el-form-item>
+          <el-form-item label="文章预览分隔符:" prop="summary_flag">
+            <el-input
+              v-model="options.summary_flag"
+              placeholder="文章预览分隔符,用于分割文章的预览部分，如不输入则预览255个字符"
             />
           </el-form-item>
           <el-form-item>
@@ -221,6 +227,7 @@ export default {
                 blog_name: '',
                 blog_website: '',
                 blog_footer: '',
+                summary_flag: '',
                 meta_title: '',
                 meta_description: '',
                 meta_keywords: '',

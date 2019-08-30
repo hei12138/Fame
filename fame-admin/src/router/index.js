@@ -27,14 +27,14 @@ const Dashboard = resolve => {
   });
 };
 
-const ArticleEdit = resolve => {
-  import("@/components/page/Article").then(module => {
+const PostEdit = resolve => {
+  import("@/components/page/Post").then(module => {
     resolve(module);
   });
 };
 
-const ArticleList = resolve => {
-  import("@/components/page/Articles").then(module => {
+const PostList = resolve => {
+  import("@/components/page/Posts").then(module => {
     resolve(module);
   });
 };
@@ -45,20 +45,26 @@ const CommentList = resolve => {
   });
 };
 
-const TagList = resolve => {
-  import("@/components/page/Tags").then(module => {
+const MetaList = resolve => {
+  import("@/components/page/Metas").then(module => {
     resolve(module);
   });
 };
 
-const PageList = resolve => {
-  import("@/components/page/Pages").then(module => {
+const MediaList = resolve => {
+  import("@/components/page/Medias").then(module => {
     resolve(module);
   });
 };
 
-const PageEdit = resolve => {
-  import("@/components/page/Page").then(module => {
+const NoteList = resolve => {
+  import("@/components/page/Notes").then(module => {
+    resolve(module);
+  });
+};
+
+const NoteEdit = resolve => {
+  import("@/components/page/Note").then(module => {
     resolve(module);
   });
 };
@@ -91,52 +97,69 @@ const router = new Router({
       children: [
         {
           path: "dashboard",
+          name: "Dashboard",
           component: Dashboard
         },
         {
-          path: "article/publish/:id",
-          component: ArticleEdit
+          path: "post/publish/:id",
+          name: "PostEdit",
+          component: PostEdit
         },
         {
-          path: "article/publish",
-          component: ArticleEdit
+          path: "post/publish",
+          name: "PostNew",
+          component: PostEdit
         },
         {
-          path: "article",
-          component: ArticleList
+          path: "post",
+          name: "PostList",
+          component: PostList
         },
         {
           path: "comment",
+          name: "CommentList",
           component: CommentList
         },
         {
-          path: "tag",
-          component: TagList
+          path: "meta",
+          name: "MetaList",
+          component: MetaList
         },
         {
-          path: "page",
-          component: PageList
+          path: "media",
+          name: "MediaList",
+          component: MediaList
         },
         {
-          path: "page/publish/:id",
-          component: PageEdit
+          path: "note",
+          name: "NoteList",
+          component: NoteList
         },
         {
-          path: "page/publish",
-          component: PageEdit
+          path: "note/publish/:id",
+          name: "NoteEdit",
+          component: NoteEdit
+        },
+        {
+          path: "note/publish",
+          name: "NoteNew",
+          component: NoteEdit
         },
         {
           path: "setting",
+          name: "Setting",
           component: Setting
         }
       ]
     },
     {
       path: "/error/:state/:message",
+      name: "ErrorMessage",
       component: Error
     },
     {
       path: "*",
+      name: "Error",
       component: Error
     }
   ]

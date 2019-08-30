@@ -1,18 +1,4 @@
 /************************************************************/
-/**
- *  全局常量
- */
-const STATIC = {
-  DEFAULT_CATEGORY: '默认分类',
-  STATUS_PUBLISH: 'publish',
-  STATUS_DRAFT: 'draft',
-  META_CATEGORY: 'category',
-  META_TAG: 'tag',
-  ASSESS_AGREE: 'agree',
-  ASSESS_DISAGREE: 'disagree'
-}
-
-/************************************************************/
 
 /**
  * 通用工具类
@@ -118,7 +104,6 @@ function formatWebsite(url) {
 }
 
 export default {
-  STATIC,
   tagsToString,
   stringToTags,
   goAnchor,

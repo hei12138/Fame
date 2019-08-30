@@ -1,25 +1,26 @@
 DROP DATABASE IF EXISTS fame;
-CREATE DATABASE fame CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE DATABASE fame CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 USE fame;
 
 CREATE TABLE sys_option
 (
     id           INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    modified TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
     option_key   VARCHAR(100)    NOT NULL UNIQUE,
-    option_value VARCHAR(1023)   NOT NULL,
-    created      TIMESTAMP       NOT NULL DEFAULT current_timestamp,
-    modified     TIMESTAMP       NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp
+    option_value VARCHAR(1023)   NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
 CREATE TABLE user
 (
     id           INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    modified TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
     username     VARCHAR(45)     NOT NULL UNIQUE,
     password_md5 VARCHAR(45)     NOT NULL,
     email        VARCHAR(45),
     screen_name  VARCHAR(45),
-    created      TIMESTAMP       NOT NULL DEFAULT current_timestamp,
     logged       TIMESTAMP       NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -27,9 +28,9 @@ CREATE TABLE user
 CREATE TABLE article
 (
     id            INT PRIMARY KEY      NOT NULL AUTO_INCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    modified TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
     title         VARCHAR(255)         NOT NULL,
-    created       TIMESTAMP            NOT NULL DEFAULT current_timestamp,
-    modified      TIMESTAMP            NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
     content       MEDIUMTEXT,
     author_id     INT,
     hits          INT     DEFAULT 0    NOT NULL,
@@ -45,6 +46,8 @@ CREATE TABLE article
 CREATE TABLE comment
 (
     id         INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    modified TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
     article_id INT             NOT NULL,
     p_id       INT,
     content    TEXT            NOT NULL,
@@ -55,14 +58,15 @@ CREATE TABLE comment
     disagree   INT             NOT NULL DEFAULT 0,
     ip         VARCHAR(255),
     agent      VARCHAR(255),
-    status     INT                      DEFAULT 0 NOT NULL,
-    created    TIMESTAMP       NOT NULL DEFAULT current_timestamp
+    status     INT                      DEFAULT 0 NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
 CREATE TABLE meta
 (
     id   INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    modified TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
     name VARCHAR(255)    NOT NULL,
     type VARCHAR(45)     NOT NULL
 ) ENGINE = InnoDB
@@ -71,21 +75,36 @@ CREATE TABLE meta
 CREATE TABLE middle
 (
     id   INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    modified TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
     a_id INT             NOT NULL,
     m_id INT             NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE media
+(
+    id   INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    modified TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
+    name VARCHAR(255) NOT NULL,
+    url VARCHAR(1023) NOT NULL,
+    thumb_url VARCHAR(1023),
+    suffix VARCHAR(255) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
 CREATE TABLE log
 (
     id      INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    modified TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
     action  VARCHAR(255),
     data    TEXT,
     message VARCHAR(255),
     type    VARCHAR(255),
     ip      VARCHAR(255),
-    user_id INT,
-    created TIMESTAMP       NOT NULL DEFAULT current_timestamp
+    user_id INT
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 

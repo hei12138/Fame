@@ -1,13 +1,11 @@
 package com.zbw.fame.model.domain;
 
+import com.zbw.fame.model.enums.CommentStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import tk.mybatis.mapper.annotation.Order;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import java.util.Date;
+import javax.persistence.*;
 
 /**
  * 评论 Model
@@ -30,8 +28,8 @@ public class Comment extends BaseEntity {
     /**
      * 父评论id
      */
-    @Column(name = "p_id", columnDefinition = "INT")
-    private Integer pId;
+    @Column(name = "parent_id", columnDefinition = "INT")
+    private Integer parentId;
 
     /**
      * 评论内容
@@ -56,13 +54,6 @@ public class Comment extends BaseEntity {
      */
     @Column(name = "website", columnDefinition = "VARCHAR(255)")
     private String website;
-
-    /**
-     * 评论时间
-     */
-    @Order("desc")
-    @Column(name = "created", columnDefinition = "TIMESTAMP NOT NULL DEFAULT current_timestamp")
-    private Date created;
 
     /**
      * 赞
@@ -91,6 +82,23 @@ public class Comment extends BaseEntity {
     /**
      * 状态
      */
-    @Column(name = "status", columnDefinition = "INT DEFAULT 0 NOT NULL")
-    private Integer status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", columnDefinition = "VARCHAR(32)")
+    private CommentStatus status;
+
+    @PrePersist
+    @Override
+    protected void prePersist() {
+        super.prePersist();
+
+        if (null == agree) {
+            agree = 0;
+        }
+        if (null == disagree) {
+            disagree = 0;
+        }
+        if (null == status) {
+            status = CommentStatus.NORMAL;
+        }
+    }
 }

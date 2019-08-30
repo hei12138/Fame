@@ -44,7 +44,7 @@
     </el-table>
     <el-dialog
       :visible.sync="detailVisible"
-      :modal="false"
+      :modal="true"
       :fullscreen="isMobile"
       :width="dialogWidth"
       center
@@ -87,21 +87,21 @@
         <el-col :xs="24" :sm="12" :md="9">{{ comment.agent }}</el-col>
       </el-row>
     </el-dialog>
-    <div class="admin-page">
-      <el-pagination
-        layout="total,prev, pager, next"
-        @current-change="init"
-        :current-page.sync="currentPage"
-        :page-size="pageSize"
-        :total="total"
-      >
-      </el-pagination>
-    </div>
+    <pagination
+      @changePage="changePage"
+      :pageSize="pageSize"
+      :total="total"
+    ></pagination>
   </div>
 </template>
 
 <script>
+import Pagination from "../common/Pagination";
+
 export default {
+  components: {
+    Pagination
+  },
   data: function() {
     return {
       commentDatas: [],
@@ -116,8 +116,12 @@ export default {
     };
   },
   methods: {
+    changePage(page) {
+      this.currentPage = page;
+      this.init();
+    },
     init() {
-      this.$api.auth.getComments(this.currentPage).then(data => {
+      this.$api.auth.pageComment(this.currentPage).then(data => {
         this.commentDatas = data.data.list;
         this.total = data.data.total;
         this.pageSize = data.data.pageSize;
@@ -133,10 +137,10 @@ export default {
       if (data.article) {
         this.comment.title = data.article.title;
       }
-      if (data.pComment) {
+      if (data.parentComment) {
         this.hasReplay = true;
-        this.comment.replayName = data.pComment.name;
-        this.comment.replay = data.pComment.content;
+        this.comment.replayName = data.parentComment.name;
+        this.comment.replay = data.parentComment.content;
       } else {
         this.hasReplay = false;
       }
@@ -184,10 +188,6 @@ export default {
 </script>
 
 <style scoped>
-.el-table {
-  border: 1px solid #e6ebf5;
-}
-
 .admin-page {
   margin-top: 30px;
   text-align: center;

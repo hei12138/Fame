@@ -1,7 +1,6 @@
 package com.zbw.fame.controller.admin;
 
-import com.github.pagehelper.Page;
-import com.zbw.fame.controller.BaseController;
+import com.zbw.fame.exception.NotFoundException;
 import com.zbw.fame.model.domain.Comment;
 import com.zbw.fame.model.dto.CommentDto;
 import com.zbw.fame.model.dto.Pagination;
@@ -9,7 +8,9 @@ import com.zbw.fame.service.CommentService;
 import com.zbw.fame.util.FameConsts;
 import com.zbw.fame.util.FameUtil;
 import com.zbw.fame.util.RestResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -20,10 +21,10 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/admin/comment")
-public class CommentController extends BaseController {
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+public class CommentController {
 
-    @Autowired
-    private CommentService commentService;
+    private final CommentService commentService;
 
     /**
      * 获取所有评论
@@ -33,10 +34,10 @@ public class CommentController extends BaseController {
      * @return {@see Pagination<Comment>}
      */
     @GetMapping
-    public RestResponse index(@RequestParam(required = false, defaultValue = "1") Integer page,
-                              @RequestParam(required = false, defaultValue = FameConsts.PAGE_SIZE) Integer limit) {
-        Page<Comment> comments = commentService.getAdminComments(page, limit);
-        return RestResponse.ok(new Pagination<Comment>(comments));
+    public RestResponse<Pagination<Comment>> index(@RequestParam(required = false, defaultValue = "0") Integer page,
+                                                   @RequestParam(required = false, defaultValue = FameConsts.PAGE_SIZE) Integer limit) {
+        Page<Comment> comments = commentService.pageAdminComments(page, limit);
+        return RestResponse.ok(Pagination.of(comments));
     }
 
     /**
@@ -46,13 +47,10 @@ public class CommentController extends BaseController {
      * @return {@see CommentDto}
      */
     @GetMapping("{id}")
-    public RestResponse detail(@PathVariable Integer id) {
+    public RestResponse<Comment> detail(@PathVariable Integer id) {
         CommentDto comment = commentService.getCommentDetail(id);
-        if (null == comment) {
-            return this.error404();
-        }
-        if (null != comment.getPComment()) {
-            comment.getPComment().setContent(FameUtil.mdToHtml(comment.getPComment().getContent()));
+        if (null != comment.getParentComment()) {
+            comment.getParentComment().setContent(FameUtil.mdToHtml(comment.getParentComment().getContent()));
         }
         comment.setContent(FameUtil.mdToHtml(comment.getContent()));
         return RestResponse.ok(comment);
@@ -66,12 +64,8 @@ public class CommentController extends BaseController {
      */
     @DeleteMapping("{id}")
     public RestResponse delete(@PathVariable Integer id) {
-        if (commentService.deleteComment(id)) {
-
-            return RestResponse.ok();
-        } else {
-            return RestResponse.fail("删除评论失败");
-        }
+        commentService.deleteComment(id);
+        return RestResponse.ok();
     }
 
     /**
@@ -80,7 +74,7 @@ public class CommentController extends BaseController {
      * @return {@see Integer}
      */
     @GetMapping("count")
-    public RestResponse count() {
+    public RestResponse<Long> count() {
         return RestResponse.ok(commentService.count());
     }
 
