@@ -5,7 +5,7 @@
         v-for="tag in tags"
         :key="tag.id"
         class="tag-link"
-        @click="changeArticles(tag.name)"
+        @click="changePosts(tag.name)"
       >
         <span
           class="tag chip"
@@ -20,15 +20,9 @@
         <div class="divider"></div>
         <div class="tag-title">{{ tagTitle }}</div>
         <ul class="tag-ul">
-          <li
-            v-for="article in articles"
-            :key="article.id"
-            class="article-title"
-          >
-            <nuxt-link
-              :to="{ path: '/article/' + article.id }"
-              class="text-primary"
-              >{{ article.title }}
+          <li v-for="post in postInfos" :key="post.id" class="article-title">
+            <nuxt-link :to="{ path: '/post/' + post.id }" class="text-primary"
+              >{{ post.title }}
             </nuxt-link>
           </li>
         </ul>
@@ -44,7 +38,7 @@ export default {
   },
   data: function() {
     return {
-      articles: [],
+      postInfos: [],
       tagTitle: '',
       activeTag: '',
       show: false
@@ -76,13 +70,13 @@ export default {
         }
       }
     },
-    changeArticles (name) {
+    changePosts (name) {
       const tag = this.tags.find(tag => Object.is(tag.name, name))
       if (tag) {
         this.activeTag = name
         this.show = false
         this.tagTitle = tag.name
-        this.articles = tag.articles
+        this.postInfos = tag.postInfos
         this.show = true
       }
     }

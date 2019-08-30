@@ -1,15 +1,16 @@
 import { get, post } from './http'
 
 const api = {
-  getArticles(page, limit) {
+  getPosts(page, limit, sort) {
     const params = {
       page: page,
-      limit: limit || 5
+      limit: limit || 5,
+      sort: sort
     }
-    return get('/article', params)
+    return get('/post', params)
   },
-  getArticle(id) {
-    return get('/article/' + id)
+  getPost(id) {
+    return get('/post/' + id)
   },
   getCategories() {
     return get('/category')
@@ -17,8 +18,11 @@ const api = {
   getTags() {
     return get('/tag')
   },
-  getPage(title) {
-    return get('/page/' + title)
+  getNoteMenu() {
+    return get('/note')
+  },
+  getNote(id) {
+    return get('/note/' + id)
   },
   getArchives() {
     return get('/archive')
@@ -31,10 +35,10 @@ const api = {
     }
     return get('comment', params)
   },
-  postComment(articleId, pId, content, name, email, website) {
+  postComment(articleId, parentId, content, name, email, website) {
     const params = {
       articleId: articleId,
-      pId: pId,
+      parentId: parentId,
       content: content,
       name: name,
       email: email,

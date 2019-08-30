@@ -1,13 +1,9 @@
 package com.zbw.fame.model.domain;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import tk.mybatis.mapper.annotation.Order;
+import com.zbw.fame.model.enums.ArticleStatus;
+import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import java.util.Date;
+import javax.persistence.*;
 
 /**
  * 文章 Model
@@ -16,6 +12,7 @@ import java.util.Date;
  * @since 2017/7/8 9:29
  */
 @Entity
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING, columnDefinition = "VARCHAR(45)")
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -26,19 +23,6 @@ public class Article extends BaseEntity {
      */
     @Column(name = "title", columnDefinition = "VARCHAR(255) NOT NULL")
     private String title;
-
-    /**
-     * 内容生成时间
-     */
-    @Order("desc")
-    @Column(name = "created", columnDefinition = "TIMESTAMP NOT NULL DEFAULT current_timestamp")
-    private Date created;
-
-    /**
-     * 内容修改时间
-     */
-    @Column(name = "modified", columnDefinition = "TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp")
-    private Date modified;
 
     /**
      * 内容
@@ -59,28 +43,17 @@ public class Article extends BaseEntity {
     private Integer hits;
 
     /**
-     * 标签列表
-     */
-    @Column(name = "tags", columnDefinition = "VARCHAR(500)")
-    private String tags;
-
-    /**
-     * 文章分类
-     */
-    @Column(name = "category", columnDefinition = "VARCHAR(500)")
-    private String category;
-
-    /**
      * 内容状态
      */
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", columnDefinition = "VARCHAR(32)")
-    private String status;
+    private ArticleStatus status;
 
     /**
-     * 内容类别
+     * 文章优先级
      */
-    @Column(name = "type", columnDefinition = "VARCHAR(32)")
-    private String type;
+    @Column(name = "priority", columnDefinition = "INT DEFAULT 0 NOT NULL")
+    private Integer priority;
 
     /**
      * 是否允许评论
@@ -93,4 +66,21 @@ public class Article extends BaseEntity {
      */
     @Column(name = "comment_count", columnDefinition = "INT DEFAULT 0 NOT NULL")
     private Integer commentCount;
+
+    @Override
+    protected void prePersist() {
+        super.prePersist();
+        if (null == hits) {
+            hits = 0;
+        }
+        if (null == priority) {
+            priority = 0;
+        }
+        if (null == allowComment) {
+            allowComment = true;
+        }
+        if (null == commentCount) {
+            commentCount = 0;
+        }
+    }
 }

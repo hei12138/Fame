@@ -1,18 +1,18 @@
 package com.zbw.fame.controller;
 
-import com.github.pagehelper.Page;
-import com.zbw.fame.model.domain.Article;
+
 import com.zbw.fame.model.domain.Comment;
-import com.zbw.fame.model.dto.Archive;
-import com.zbw.fame.model.dto.CommentDto;
-import com.zbw.fame.model.dto.MetaDto;
-import com.zbw.fame.model.dto.Pagination;
+import com.zbw.fame.model.domain.Note;
+import com.zbw.fame.model.domain.Post;
+import com.zbw.fame.model.dto.*;
+import com.zbw.fame.model.enums.CommentAssessType;
 import com.zbw.fame.service.*;
 import com.zbw.fame.util.FameConsts;
 import com.zbw.fame.util.FameUtil;
 import com.zbw.fame.util.RestResponse;
-import com.zbw.fame.util.Types;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,35 +27,36 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api")
-public class FrontController extends BaseController {
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+public class FrontController {
 
-    @Autowired
-    private ArticleService articleService;
+    private final PostService postService;
 
-    @Autowired
-    private MetaService metaService;
+    private final NoteService noteService;
 
-    @Autowired
-    private CommentService commentService;
+    private final CategoryService categoryService;
 
-    @Autowired
-    private EmailService emailService;
+    private final TagService tagService;
 
-    @Autowired
-    private OptionService optionService;
+    private final CommentService commentService;
+
+    private final EmailService emailService;
+
+    private final OptionService optionService;
 
     /**
      * 文章列表
      *
      * @param page  第几页
      * @param limit 每页数量
-     * @return {@see Pagination<Article>}
+     * @return {@see Pagination<Post>}
      */
-    @GetMapping("article")
-    public RestResponse home(@RequestParam(required = false, defaultValue = "1") Integer page,
-                             @RequestParam(required = false, defaultValue = FameConsts.PAGE_SIZE) Integer limit) {
-        Page<Article> articles = articleService.getFrontArticles(page, limit);
-        return RestResponse.ok(new Pagination<Article>(articles));
+    @GetMapping("post")
+    public RestResponse<Pagination<Post>> home(@RequestParam(required = false, defaultValue = "0") Integer page,
+                                               @RequestParam(required = false, defaultValue = FameConsts.PAGE_SIZE) Integer limit,
+                                               @RequestParam(required = false, defaultValue = "id") List<String> sort) {
+        Page<Post> posts = postService.pageFrontArticle(page, limit, sort);
+        return RestResponse.ok(Pagination.of(posts));
     }
 
     /**
@@ -64,33 +65,23 @@ public class FrontController extends BaseController {
      * @param id 文章id
      * @return {@see Article}
      */
-    @GetMapping("article/{id}")
-    public RestResponse article(@PathVariable Integer id) {
-        Article article = articleService.getFrontArticle(id);
-        if (null == article) {
-            return this.error404();
-        }
-        this.updateHits(article.getId(), article.getHits());
-        return RestResponse.ok(article);
+    @GetMapping("post/{id}")
+    public RestResponse<Post> post(@PathVariable Integer id) {
+        Post post = postService.getFrontArticle(id);
+        this.updateHits(post);
+        return RestResponse.ok(post);
     }
 
     /**
      * 点击量添加
      *
-     * @param articleId 文章id
-     * @param hits      当前点击量
+     * @param post 文章实体
      */
-    private void updateHits(Integer articleId, Integer hits) {
-        Integer cHits = cacheUtil.getCacheValue(FameConsts.CACHE_ARTICLE_HITS, articleId, Integer.class);
-        cHits = null == cHits ? 1 : cHits + 1;
-        if (cHits >= FameConsts.CACHE_ARTICLE_HITS_SAVE) {
-            Article temp = new Article();
-            temp.setId(articleId);
-            temp.setHits(hits + cHits);
-            articleService.updateArticle(temp);
-            cacheUtil.putCacheValue(FameConsts.CACHE_ARTICLE_HITS, articleId, 0);
-        } else {
-            cacheUtil.putCacheValue(FameConsts.CACHE_ARTICLE_HITS, articleId, cHits);
+    private void updateHits(Post post) {
+        int hits = post.getHits() + 1;
+        post.setHits(hits);
+        if (hits % FameConsts.CACHE_ARTICLE_HITS_SAVE == 0) {
+            postService.updateHits(post.getId(), hits);
         }
     }
 
@@ -98,23 +89,23 @@ public class FrontController extends BaseController {
     /**
      * 标签页
      *
-     * @return {@see List<MetaDto>}
+     * @return {@see List<MetaInfo>}
      */
     @GetMapping("tag")
-    public RestResponse tag() {
-        List<MetaDto> metaDtos = metaService.getPublishMetaDtos(Types.TAG);
-        return RestResponse.ok(metaDtos);
+    public RestResponse<List<MetaInfo>> tag() {
+        List<MetaInfo> metaInfos = tagService.getFrontMetaInfos();
+        return RestResponse.ok(metaInfos);
     }
 
     /**
      * 分类页
      *
-     * @return {@see List<MetaDto>}
+     * @return {@see List<MetaInfo>}
      */
-    @GetMapping("/category")
-    public RestResponse category() {
-        List<MetaDto> metaDtos = metaService.getPublishMetaDtos(Types.CATEGORY);
-        return RestResponse.ok(metaDtos);
+    @GetMapping("category")
+    public RestResponse<List<MetaInfo>> category() {
+        List<MetaInfo> metaInfos = categoryService.getFrontMetaInfos();
+        return RestResponse.ok(metaInfos);
     }
 
     /**
@@ -123,24 +114,32 @@ public class FrontController extends BaseController {
      * @return {@see List<Archive>}
      */
     @GetMapping("archive")
-    public RestResponse archive() {
-        List<Archive> archives = articleService.getArchives();
+    public RestResponse<List<Archive>> archive() {
+        List<Archive> archives = postService.getArchives();
         return RestResponse.ok(archives);
+    }
+
+    /**
+     * 获取自定义页面的列表,根据权重排序
+     *
+     * @return {@see List<NoteInfo>}
+     */
+    @GetMapping("note")
+    public RestResponse<List<NoteInfo>> noteList() {
+        List<NoteInfo> notes = noteService.getFrontNoteList();
+        return RestResponse.ok(notes);
     }
 
     /**
      * 自定义页面
      *
-     * @param title 页面标题
+     * @param id 页面id
      * @return {@see Article}
      */
-    @GetMapping("page/{title}")
-    public RestResponse page(@PathVariable String title) {
-        Article page = articleService.getFrontPage(title);
-        if (null == page) {
-            return error404();
-        }
-        return RestResponse.ok(page);
+    @GetMapping("note/{id}")
+    public RestResponse<Note> note(@PathVariable Integer id) {
+        Note note = noteService.getFrontArticle(id);
+        return RestResponse.ok(note);
     }
 
     /**
@@ -152,10 +151,10 @@ public class FrontController extends BaseController {
      * @return {@see Pagination<Comment>}
      */
     @GetMapping("comment")
-    public RestResponse getArticleComment(@RequestParam Integer articleId, @RequestParam(required = false, defaultValue = "1") Integer page,
-                                          @RequestParam(required = false, defaultValue = FameConsts.PAGE_SIZE) Integer limit) {
+    public RestResponse<Pagination<Comment>> getArticleComment(@RequestParam Integer articleId, @RequestParam(required = false, defaultValue = "0") Integer page,
+                                                               @RequestParam(required = false, defaultValue = FameConsts.PAGE_SIZE) Integer limit) {
         Page<Comment> comments = commentService.getCommentsByArticleId(page, limit, articleId);
-        return RestResponse.ok(new Pagination<Comment>(comments));
+        return RestResponse.ok(Pagination.of(comments));
     }
 
 
@@ -163,7 +162,7 @@ public class FrontController extends BaseController {
      * 发表评论
      *
      * @param articleId 文章id
-     * @param pId       父评论id
+     * @param parentId  父评论id
      * @param content   评论内容
      * @param name      评论用户名
      * @param email     评论用户email
@@ -171,12 +170,15 @@ public class FrontController extends BaseController {
      * @return {@see RestResponse.ok()}
      */
     @PostMapping("comment")
-    public RestResponse postComment(@RequestParam Integer articleId, @RequestParam(required = false) Integer pId,
-                                    @RequestParam String content, @RequestParam String name,
-                                    @RequestParam(required = false) String email, @RequestParam(required = false) String website) {
+    public RestResponse addComment(@RequestParam Integer articleId,
+                                   @RequestParam(required = false) Integer parentId,
+                                   @RequestParam String content,
+                                   @RequestParam String name,
+                                   @RequestParam(required = false) String email,
+                                   @RequestParam(required = false) String website) {
         Comment comments = new Comment();
         comments.setArticleId(articleId);
-        comments.setPId(pId);
+        comments.setParentId(parentId);
         comments.setContent(content);
         comments.setName(name);
         comments.setEmail(email);
@@ -188,8 +190,8 @@ public class FrontController extends BaseController {
         //发送邮件提醒
         CommentDto commentDetail = commentService.getCommentDetail(comments.getId());
         emailService.sendEmailToAdmin(commentDetail);
-        if (null != commentDetail.getPComment() && !StringUtils.isEmpty(commentDetail.getPComment().getEmail())) {
-            emailService.sendEmailToUser(commentDetail, commentDetail.getPComment().getEmail());
+        if (null != commentDetail.getParentComment() && !StringUtils.isEmpty(commentDetail.getParentComment().getEmail())) {
+            emailService.sendEmailToUser(commentDetail, commentDetail.getParentComment().getEmail());
         }
         return RestResponse.ok();
     }
@@ -198,11 +200,11 @@ public class FrontController extends BaseController {
      * 顶或踩评论
      *
      * @param commentId 评论id
-     * @param assess    {@link Types#AGREE},{@link Types#DISAGREE}
+     * @param assess    点评类型 {@link CommentAssessType}
      * @return {@see RestResponse.ok()}
      */
     @PostMapping("comment/{commentId}/assess")
-    public RestResponse assessComment(@PathVariable Integer commentId, @RequestParam String assess) {
+    public RestResponse assessComment(@PathVariable Integer commentId, @RequestParam CommentAssessType assess) {
         commentService.assessComment(commentId, assess);
         return RestResponse.ok();
     }
@@ -213,7 +215,7 @@ public class FrontController extends BaseController {
      * @return Map
      */
     @GetMapping("option")
-    public RestResponse getOption() {
+    public RestResponse<Map<String, String>> getOption() {
         Map<String, String> map = optionService.getFrontOptionMap();
         return RestResponse.ok(map);
     }

@@ -1,9 +1,9 @@
 package com.zbw.fame.service;
 
-import com.github.pagehelper.Page;
 import com.zbw.fame.model.domain.Comment;
 import com.zbw.fame.model.dto.CommentDto;
-import com.zbw.fame.util.Types;
+import com.zbw.fame.model.enums.CommentAssessType;
+import org.springframework.data.domain.Page;
 
 /**
  * 评论 Service 接口
@@ -36,7 +36,7 @@ public interface CommentService {
      * @param limit 每页数量
      * @return Page<Comment>
      */
-    Page<Comment> getAdminComments(Integer page, Integer limit);
+    Page<Comment> pageAdminComments(Integer page, Integer limit);
 
     /**
      * 获取评论详情
@@ -50,22 +50,29 @@ public interface CommentService {
      * 删除评论
      *
      * @param id 评论id
-     * @return 删除是否成功
      */
-    boolean deleteComment(Integer id);
+    void deleteComment(Integer id);
+
+    /**
+     * 根据文章id删除评论
+     *
+     * @param articleId 文章id
+     * @return 删除评论数量
+     */
+    int deleteCommentByArticleId(Integer articleId);
 
     /**
      * 顶或踩评论
      *
      * @param commentId 评论给id
-     * @param assess    {@link Types#AGREE},{@link Types#DISAGREE}
+     * @param assess    点评类型 {@link CommentAssessType}
      */
-    void assessComment(Integer commentId, String assess);
+    void assessComment(Integer commentId, CommentAssessType assess);
 
     /**
      * 评论数量
      *
      * @return 数量
      */
-    Integer count();
+    Long count();
 }

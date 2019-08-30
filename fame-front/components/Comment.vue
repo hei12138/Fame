@@ -97,13 +97,13 @@
               </div>
               <div v-highlight class="comment-item-content markdown-body">
                 <div
-                  v-if="comment.pId !== -1 && comment.pComment"
+                  v-if="comment.parentId !== -1 && comment.parentComment"
                   class="comment-item-reply-box"
                 >
-                  <a class="user-name">{{ comment.pComment.name }}</a>
+                  <a class="user-name">{{ comment.parentComment.name }}</a>
                   <div
                     class="comment-item-replay-content"
-                    v-html="comment.pComment.content"
+                    v-html="comment.parentComment.content"
                   ></div>
                 </div>
                 <div v-html="comment.content"></div>
@@ -140,7 +140,7 @@
 const defaultPlaceholder = '写下你的评论,支持markdown语法哟...'
 // 设置999不分页
 const defaultLimit = 999
-const defaultPage = 1
+const defaultPage = 0
 export default {
   props: {
     articleId: {

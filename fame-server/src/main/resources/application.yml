@@ -3,6 +3,7 @@ server:
   port: 9090
 spring:
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: none
     database-platform: org.hibernate.dialect.HSQLDialect
@@ -26,12 +27,13 @@ spring:
   jackson:
     date-format: yyyy/MM/dd HH:mm:ss
     time-zone: GMT+8
-logging:
-  file:
-    max-size: 10MB
-    max-history: 15
-  level:
-    root: info
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 50MB
+    level:
+      root: info
 
 
 

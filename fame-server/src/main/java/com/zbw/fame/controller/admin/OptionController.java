@@ -1,8 +1,8 @@
 package com.zbw.fame.controller.admin;
 
-import com.zbw.fame.controller.BaseController;
 import com.zbw.fame.service.OptionService;
 import com.zbw.fame.util.RestResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +16,10 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/admin/option")
-public class OptionController extends BaseController {
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+public class OptionController {
 
-    @Autowired
-    private OptionService optionService;
+    private final OptionService optionService;
 
     /**
      * 获取所有设置
@@ -27,7 +27,7 @@ public class OptionController extends BaseController {
      * @return Map
      */
     @GetMapping("all")
-    public RestResponse getAllOptions() {
+    public RestResponse<Map<String, String>> getAllOptions() {
         return RestResponse.ok(optionService.getAllOptionMap());
     }
 
