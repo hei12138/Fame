@@ -9,9 +9,6 @@ import com.zbw.fame.util.FameUtil;
 import com.zbw.fame.util.OptionKeys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.jdbc.ScriptRunner;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -21,14 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.Resource;
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.io.Reader;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * springboot初始化完成后执行的动作
@@ -57,9 +46,6 @@ public class InitApplicationRunner implements ApplicationRunner {
 
     private final OptionService optionService;
 
-    @Resource
-    private SqlSessionFactory sqlSessionFactory;
-
     private static final String DEFAULT_TAG = "First";
 
     private static final String DEFAULT_CATEGORY = "New";
@@ -76,11 +62,6 @@ public class InitApplicationRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         log.info("initializing Fame database after spring boot loading completed");
-        long startInitDatabaseTime = System.currentTimeMillis();
-        runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-                "initHsql.sql");
-        log.info("Initializing database in " + (System.currentTimeMillis() - startInitDatabaseTime) + " ms");
-        log.info("Initializing Fame after springboot loading completed...");
         long startTime = System.currentTimeMillis();
 
         boolean isInit = optionService.get(OptionKeys.FAME_INIT, Boolean.FALSE);
@@ -240,22 +221,6 @@ public class InitApplicationRunner implements ApplicationRunner {
         }
         if (StringUtils.isEmpty(optionService.get(OptionKeys.SUMMARY_FLAG))) {
             optionService.save(OptionKeys.SUMMARY_FLAG, FameConsts.DEFAULT_SUMMARY_FLAG);
-        }
-    }
-
-    public static void runScript(DataSource ds, String resource) throws IOException, SQLException {
-        try (Connection connection = ds.getConnection()) {
-            ScriptRunner runner = new ScriptRunner(connection);
-            runner.setAutoCommit(true);
-            runner.setSendFullScript(false);
-            runner.setStopOnError(false);
-            runScript(runner, resource);
-        }
-    }
-
-    public static void runScript(ScriptRunner runner, String resource) throws IOException, SQLException {
-        try (Reader reader = Resources.getResourceAsReader(resource)) {
-            runner.runScript(reader);
         }
     }
 }

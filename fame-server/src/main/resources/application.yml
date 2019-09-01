@@ -12,6 +12,7 @@ spring:
     url: jdbc:hsqldb:mem:fame
     username: sa
     password:
+    schema: classpath:initHsql.sql
   #mail
   mail:
     properties:
