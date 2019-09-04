@@ -1,9 +1,9 @@
 #datasource
 spring:
   datasource:
-    driverClassName: org.hsqldb.jdbcDriver
-    url: jdbc:hsqldb:mem:fame
-    username: sa
-    password:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://49.235.247.96:3306/fame?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowMultiQueries=true
+    username: root
+    password: LIshencai520
   jpa:
     show-sql: true

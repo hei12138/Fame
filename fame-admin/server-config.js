@@ -1,8 +1,8 @@
 const isProd = process.env.NODE_ENV === "production";
 
-const devUrl = "http://127.0.0.1:9090/";
-const prodUrl = "/";
-const devFrontUrl = "http://127.0.0.1:3000/";
+const devUrl = "http://www.woolboy.cn/";
+const prodUrl = "http://www.woolboy.cn/";
+const devFrontUrl = "http://www.woolboy.cn/";
 const prodFrontUrl = "/";
 
 const api = isProd ? prodUrl : devUrl;

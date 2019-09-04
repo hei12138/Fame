@@ -1,18 +1,13 @@
 #端口号
 server:
   port: 9090
+  address: 0.0.0.0
 spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none
-    database-platform: org.hibernate.dialect.HSQLDialect
-  datasource:
-    driverClassName: org.hsqldb.jdbcDriver
-    url: jdbc:hsqldb:mem:fame
-    username: sa
-    password:
-    schema: classpath:initHsql.sql
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL8Dialect
   #mail
   mail:
     properties:
